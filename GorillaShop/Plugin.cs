@@ -1,18 +1,12 @@
 ﻿using BepInEx;
 using GorillaNetworking;
-using HarmonyLib;
 using Photon.Pun;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
-using Utilla;
-using System.Collections.Generic;
-using UniverseLib.UI;
-using UnityEngine.EventSystems;
 
 namespace GorillaShop
 {
@@ -106,10 +100,18 @@ namespace GorillaShop
         {
             foreach (CosmeticsController.CosmeticItem ci in CosmeticsController.instance.allCosmetics)
             {
-                if (ci.cost > 0 && ci.canTryOn == true)
+                if (ci.canTryOn == true)
                 {
-                    p.Canbuy.Add(ci);
-                    Instantiate(p.Item).AddComponent<ShopItem>().Item = ci;
+                    if (ci.cost == 0)
+                    {
+                        CosmeticsController.instance.itemToBuy = ci;
+                        CosmeticsController.instance.PurchaseItem();
+                    }
+                    else
+                    {
+                        p.Canbuy.Add(ci);
+                        Instantiate(p.Item).AddComponent<ShopItem>().Item = ci;
+                    }
                 }
             }
         }
