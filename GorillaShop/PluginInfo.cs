@@ -7,6 +7,6 @@
     {
         public const string GUID = "com.graze.gorillatag.gorillashop";
         public const string Name = "GorillaShop";
-        public const string Version = "2.1.0";
+        public const string Version = "3.0.0";
     }
 }
