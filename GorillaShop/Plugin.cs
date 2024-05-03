@@ -7,27 +7,28 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
-
 namespace GorillaShop
 {
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
-    [BepInDependency("com.sinai.unityexplorer")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
-        Canvas canvas;
-        public GameObject StuffContainer;
-        public GameObject Item;
-        public Text ammount;
-        public Text totalall;
-        public bool got;
-        bool finished;
-        public List<CosmeticsController.CosmeticItem> Canbuy = new List<CosmeticsController.CosmeticItem>();
-        public List<GameObject> shopitems = new List<GameObject>();
-        bool open;
-        ItemManager itemManager;
-        public static Plugin i;
+        public static Canvas canvas;
+
+        public static GameObject Item, StuffContainer;
+
+        public static Text ammount, totalall;
+
+        public static bool finished, open = false, hide = true, got;
+
+        public static List<CosmeticsController.CosmeticItem> Canbuy = new List<CosmeticsController.CosmeticItem>();
+        public static List<GameObject> shopitems = new List<GameObject>();
+
+        public static ItemManager itemManager;
+
+        bool ran;
+
 
         string ButtonText()
         {
@@ -37,16 +38,15 @@ namespace GorillaShop
             }
             else
             {
-                return "Shop";
+                return "Shop - " + shopitems.Count;
             }
         }
 
-        void Start(){Utilla.Events.GameInitialized += OnGameInitialized;}
-        void OnGameInitialized(object sender, EventArgs e)
+        void OnGameInitialized()
         {
-            itemManager = gameObject.AddComponent<ItemManager>();
             Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("GorillaShop.Assets.shop");
             AssetBundle bundle = AssetBundle.LoadFromStream(str);
+            itemManager = gameObject.AddComponent<ItemManager>();
             GameObject s = Instantiate(bundle.LoadAsset<GameObject>("shopanch"));
             canvas = s.transform.GetChild(0).GetComponent<Canvas>();
             canvas.targetDisplay = 0;
@@ -56,34 +56,50 @@ namespace GorillaShop
             ammount = canvas.transform.GetChild(0).GetChild(3).GetComponent<Text>();
             totalall = canvas.transform.GetChild(0).GetChild(5).GetComponent<Text>();
             canvas.gameObject.SetActive(false);
-            open = false;
-            i = this;
             str.Close();
-            bundle.Unload(false);
         }
         void Update()
         {
-            if (open == true)
+            if (!ran && PhotonNetwork.IsConnectedAndReady)
             {
-                canvas.gameObject.SetActive(true);
-            }
-            if (open == false)
-            {
-                canvas.gameObject.SetActive(false);
+                OnGameInitialized();
+                ran = true;
             }
             if (got && !finished)
             {
                 StartCoroutine(Delay());
             }
+            if (Keyboard.current.oKey.wasPressedThisFrame)
+            {
+                hide = !hide;
+            }
+            if (!hide)
+            {
+                if (open == true)
+                {
+                    canvas.gameObject.SetActive(true);
+                }
+                if (open == false)
+                {
+                    canvas.gameObject.SetActive(false);
+                }
+            }
         }
         private void OnGUI()
         {
-            if (GUI.Button(new Rect(0, 0, 80, 20f), ButtonText()))
+            if (!hide)
             {
-                if (finished)
+                if (GUI.Button(new Rect(0, 0, 80, 20f), ButtonText()))
                 {
-                    open = !open;
+                    if (finished)
+                    {
+                        open = !open;
+                    }
                 }
+            }
+            else
+            {
+                return;
             }
         }
         IEnumerator Delay()
@@ -94,21 +110,17 @@ namespace GorillaShop
     }
     public class ItemManager : MonoBehaviour
     {
-        Plugin p;
-        public int allcost;
-        void Awake()
-        {
-            p = gameObject.GetComponent<Plugin>();
-            allcost = 0;
-        }
+        public int allcost = 0;
+        public bool tryon;
         void Update()
         {
-            p.totalall.text = allcost.ToString();
-            p.ammount.text = CosmeticsController.instance.currencyBalance.ToString();
-            if (PhotonNetwork.IsConnectedAndReady && p.got == false)
+            Plugin.totalall.text = allcost.ToString();
+            Plugin.ammount.text = CosmeticsController.instance.currencyBalance.ToString();
+            if (PhotonNetwork.IsConnectedAndReady && Plugin.got == false)
             {
                 GetItems();
             }
+            tryon = GorillaTagger.Instance.offlineVRRig.inTryOnRoom;
         }
 
         void GetItems()
@@ -122,35 +134,28 @@ namespace GorillaShop
                         CosmeticsController.instance.itemToBuy = ci;
                         CosmeticsController.instance.PurchaseItem();
                     }
-                    else
-                    {
-                        p.Canbuy.Add(ci);
-                        Instantiate(p.Item).AddComponent<ShopItem>().Item = ci;
-                    }
                 }
+                Plugin.Canbuy.Add(ci);
+                Instantiate(Plugin.Item).AddComponent<ShopItem>().Item = ci;
             }
-            p.got = true;
+            Plugin.got = true;
         }
     }
 
     public class ShopItem : MonoBehaviour
     {
-        Plugin p = Plugin.i;
-        ItemManager i;
         public CosmeticsController.CosmeticItem Item;
         Image image;
-        public Text DispName;
-        Text Price;
+        public Text DispName, Price;
         Button button;
         void Awake()
-        {  
-            i = p.gameObject.GetComponent<ItemManager>();
-            p.shopitems.Add(gameObject);
-            transform.SetParent(p.StuffContainer.transform);
+        {
+            Plugin.shopitems.Add(gameObject);
+            transform.SetParent(Plugin.StuffContainer.transform);
             image = transform.GetChild(0).GetComponent<Image>();
             DispName = transform.GetChild(1).GetComponent<Text>();
             Price = transform.GetChild(3).GetComponent<Text>();
-            button = transform.GetChild(4).GetComponent<Button>();  
+            button = transform.GetChild(4).GetComponent<Button>();
             DispName.text = Item.overrideDisplayName;
             button.onClick.AddListener(BuyItem);
         }
@@ -161,10 +166,20 @@ namespace GorillaShop
                 image.sprite = Item.itemPicture;
                 image.overrideSprite = Item.itemPicture;
             }
-            if (Price.text != Item.cost.ToString())
+            if (CosmeticsController.instance.unlockedCosmetics.Contains(Item))
+            {
+                Price.text = "OWNED";
+                button.gameObject.SetActive(false);
+            }
+            else if(Item.canTryOn == false) 
+            {
+                Price.text = "UNAVALABLE";
+                button.gameObject.SetActive(false);
+            }
+            else if(Price.text != Item.cost.ToString())
             {
                 Price.text = Item.cost.ToString();
-                i.allcost = i.allcost + Item.cost;
+                Plugin.itemManager.allcost = Plugin.itemManager.allcost + Item.cost;
             }
             if (Item.overrideDisplayName != "")
             {
@@ -174,7 +189,7 @@ namespace GorillaShop
                     gameObject.name = Item.overrideDisplayName;
                 }
             }
-            else 
+            else
             {
                 if (DispName.text != Item.displayName)
                 {
@@ -186,11 +201,39 @@ namespace GorillaShop
             {
                 Destroy(this.gameObject);
             }
+            switch (Plugin.itemManager.tryon)
+            {
+                case true:
+                    button.transform.GetChild(0).GetComponent<Text>().text = "TRY";
+                    break;
+                case false:
+                    button.transform.GetChild(0).GetComponent<Text>().text = "BUY";
+                    break;
+            }
         }
         void BuyItem()
         {
-            CosmeticsController.instance.itemToBuy = Item;
-            CosmeticsController.instance.PurchaseItem();
+            if (Plugin.itemManager.tryon)
+            {
+                if (CosmeticsController.instance.currentCart.Count >= 12)
+                {
+                    CosmeticsController.instance.currentCart.Clear();
+                }
+                if (!CosmeticsController.instance.currentCart.Contains(Item))
+                {
+                    CosmeticsController.instance.currentCart.Add(Item);
+                }
+
+            }
+            else
+            {
+                CosmeticsController.instance.itemToBuy = Item;
+                CosmeticsController.instance.PurchaseItem();
+                Plugin.itemManager.allcost = Plugin.itemManager.allcost - Item.cost;
+            }
+            CosmeticsController.instance.UpdateShoppingCart();
+            CosmeticsController.instance.UpdateCurrencyBoard();
+
         }
     }
 }
