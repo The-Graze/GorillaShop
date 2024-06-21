@@ -1,12 +1,9 @@
 ﻿namespace GorillaShop
 {
-    /// <summary>
-    /// This class is used to provide information about your mod to BepInEx.
-    /// </summary>
     internal class PluginInfo
     {
         public const string GUID = "com.graze.gorillatag.gorillashop";
         public const string Name = "GorillaShop";
-        public const string Version = "3.0.0";
+        public const string Version = "4.0.0";
     }
 }
