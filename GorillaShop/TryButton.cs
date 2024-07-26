@@ -17,7 +17,7 @@ namespace GorillaShop
 
         public void Start()
         {
-            GetComponent<Renderer>().enabled = false;
+           GetComponent<Renderer>().enabled = false;
         }
 
         private void OnTriggerEnter(Collider collider)

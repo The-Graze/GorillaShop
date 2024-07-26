@@ -17,6 +17,7 @@ namespace GorillaShop
     public class Plugin : BaseUnityPlugin
     {
         public static GameObject temp;
+        public static GorillaPressableButton ButtonBase;
         public Plugin()
         {
             HarmonyPatches.ApplyHarmonyPatches();
@@ -24,11 +25,16 @@ namespace GorillaShop
             AssetBundle bundle = AssetBundle.LoadFromStream(str);
             temp = bundle.LoadAsset<GameObject>("shopanch");
             str.Close();
+            bundle.UnloadAsync(false);
         }
 
         void Start()
         {
-            GorillaTagger.OnPlayerSpawned(delegate { new GameObject("GorillaShop Manager").AddComponent<ShopManager>(); });
+            GorillaTagger.OnPlayerSpawned(delegate
+            {
+                new GameObject("GorillaShop Manager").AddComponent<ShopManager>(); 
+                ButtonBase = FindObjectOfType<GorillaPressableButton>();
+            });
         }
     }
 }
