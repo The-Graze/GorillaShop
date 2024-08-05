@@ -1,6 +1,6 @@
 # GorillaShop
 
-![image](https://github.com/The-Graze/GorillaShop/assets/82724623/29f8d466-f585-4203-bc24-a3b593c18f95)
+![image](https://github.com/user-attachments/assets/ac5f6bbb-a7d8-4780-8c16-59be9025a461)
 
 
-Lets you buy any cosmetic that is avalable
+Lets you Try or buy any cosmetic that is avalable
