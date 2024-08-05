@@ -1,48 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Photon.Pun;
-using PlayFab.ClientModels;
+﻿using GorillaShop;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
-namespace GorillaShop
+public class ScollBar : MonoBehaviour
 {
-    public class ScollBar : MonoBehaviour
+    public bool up;
+    private bool isScrolling = false;
+    private float scrollDistance = 5f;
+    private float scrollSpeed = 10f;
+
+    public void ButtonActivation()
     {
-        public bool up;
-        public float debounceTime = 0.25f;
-
-        public float touchTime;
-
-        void Start()
+        if (!isScrolling)
         {
+            StartCoroutine(SmoothScroll());
         }
-        private void OnTriggerEnter(Collider collider)
-        {
-            if (!base.enabled || !(touchTime + debounceTime < Time.time) || collider.GetComponentInParent<GorillaTriggerColliderHandIndicator>() == null)
-            {
-                return;
-            }
+    }
 
-            touchTime = Time.time;
-            GorillaTriggerColliderHandIndicator component = collider.GetComponent<GorillaTriggerColliderHandIndicator>();
-            if (!(component == null))
-            {
-                ButtonActivation();
-            }
-        }
-        public void ButtonActivation()
+    private IEnumerator SmoothScroll()
+    {
+        isScrolling = true;
+        float targetY = ShopManager.Instance.StuffContainer.transform.localPosition.y + (up ? scrollDistance : -scrollDistance);
+
+        while (Mathf.Abs(ShopManager.Instance.StuffContainer.transform.localPosition.y - targetY) > 0.01f)
         {
-            if (up)
-            {
-                ShopManager.Instance.StuffContainer.transform.localPosition = new Vector3(ShopManager.Instance.StuffContainer.transform.localPosition.x, ShopManager.Instance.StuffContainer.transform.localPosition.y + 300, ShopManager.Instance.StuffContainer.transform.localPosition.z);
-            }
-            else
-            {
-                ShopManager.Instance.StuffContainer.transform.localPosition = new Vector3(ShopManager.Instance.StuffContainer.transform.localPosition.x, ShopManager.Instance.StuffContainer.transform.localPosition.y - 300, ShopManager.Instance.StuffContainer.transform.localPosition.z);
-            }
+            Vector3 newPosition = ShopManager.Instance.StuffContainer.transform.localPosition;
+            newPosition.y = Mathf.Lerp(newPosition.y, targetY, Time.deltaTime * scrollSpeed);
+            ShopManager.Instance.StuffContainer.transform.localPosition = newPosition;
+            yield return null;
         }
 
+        ShopManager.Instance.StuffContainer.transform.localPosition = new Vector3(
+            ShopManager.Instance.StuffContainer.transform.localPosition.x,
+            targetY,
+            ShopManager.Instance.StuffContainer.transform.localPosition.z
+        );
+
+        isScrolling = false;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        GorillaTriggerColliderHandIndicator component = other.GetComponent<GorillaTriggerColliderHandIndicator>();
+        if (component != null)
+        {
+            ButtonActivation();
+        }
     }
 }
