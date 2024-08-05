@@ -19,8 +19,6 @@ namespace GorillaShop
         private Canvas canvas;
         public GameObject ItemPrefab, StuffContainer;
 
-        public Text amountText, totalAllText;
-
         private bool reset, firstRun;
 
         public GorillaPressableButton ButtonBase;
@@ -52,8 +50,6 @@ namespace GorillaShop
 
             StuffContainer = canvas.transform.GetChild(0).GetChild(0).GetChild(0).gameObject;
             ItemPrefab = StuffContainer.transform.GetChild(0).gameObject;
-            amountText = canvas.transform.GetChild(0).GetChild(3).GetComponent<Text>();
-            totalAllText = canvas.transform.GetChild(0).GetChild(5).GetComponent<Text>();
 
             Transform baseTransform = transform.GetChild(0);
             baseTransform.localPosition = Vector3.zero;
@@ -111,12 +107,12 @@ namespace GorillaShop
             if (upScroll == null)
             {
                 upScroll = MakeScroller(true);
-                upScroll.transform.localScale = new Vector3(60, 60, 60);
-                upScroll.transform.localPosition = new Vector3(-562.0765f, -352.4211f, 50.0053f);
+                upScroll.transform.localScale = new Vector3(30, 30, 30);
+                upScroll.transform.localPosition = new Vector3(20.771f, -18.5237f, 6.6018f);
 
                 downScroll = MakeScroller(false);
-                downScroll.transform.localScale = new Vector3(60, 60, 60);
-                downScroll.transform.localPosition = new Vector3(-562.0765f, 347.5789f, 50.0053f);
+                downScroll.transform.localScale = new Vector3(30, 30, 30);
+                downScroll.transform.localPosition = new Vector3(20.771f, 403.9127f, 6.6018f);
             }
         }
 
@@ -128,16 +124,21 @@ namespace GorillaShop
                 StuffContainer.transform.localPosition = new Vector3(0, -11375f, 0);
                 reset = true;
             }
-
-            totalAllText.text = allCost.ToString();
-            amountText.text = CosmeticsController.instance.currencyBalance.ToString();
         }
 
         ScollBar MakeScroller(bool isUp)
         {
-            // Implementation for creating scroll bars
-            return null;
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var meshFilter = cube.GetComponent<MeshFilter>();
+            var scollBar = Instantiate(ButtonBase, transform).AddComponent<ScollBar>();
+            scollBar.GetComponent<MeshFilter>().mesh = meshFilter.mesh;
+            scollBar.GetComponent<Renderer>().material = ButtonBase.GetComponent<GorillaPressableButton>().unpressedMaterial;
+            Destroy(scollBar.GetComponent<GorillaPressableButton>());
+            Destroy(cube);
+            scollBar.GetComponent<ScollBar>().up = isUp;
+            return scollBar;
         }
+
 
         public class ShopItem : MonoBehaviour
         {
@@ -153,6 +154,7 @@ namespace GorillaShop
                 displayName = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
                 price = transform.GetChild(3).GetComponent<TextMeshProUGUI>();
                 button = transform.GetChild(4).gameObject;
+                button.SetActive(true);
             }
 
             void Start()
