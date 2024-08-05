@@ -8,7 +8,7 @@ using TMPro;
 
 namespace GorillaShop
 {
-    public class ShopManager : MonoBehaviourPunCallbacks
+    public class ShopManager : MonoBehaviour
     {
         public static ShopManager Instance { get; private set; }
         public int allCost = 0;
@@ -37,6 +37,7 @@ namespace GorillaShop
             {
                 Destroy(gameObject);
             }
+            transform.SetParent(GameObject.Find("Environment Objects/LocalObjects_Prefab/City").transform, true);
         }
 
         void InitializeShop()
@@ -59,24 +60,6 @@ namespace GorillaShop
             transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
             transform.position = new Vector3(-55.4996f, 16.8141f, -115.2831f);
             transform.rotation = Quaternion.Euler(359.9f, 299.4711f, 0);
-        }
-
-        public override void OnJoinedRoom()
-        {
-            if (!firstRun)
-            {
-                UnlockFreeItems();
-                PopulateShopItems();
-
-                if (ButtonBase == null)
-                {
-                    ButtonBase = FindObjectOfType<GorillaPressableButton>();
-                }
-
-                InitializeScrollBars();
-
-                firstRun = true;
-            }
         }
 
         void UnlockFreeItems()
@@ -118,11 +101,19 @@ namespace GorillaShop
 
         void Update()
         {
-            if (!reset && PhotonNetwork.InRoom)
+            if (!firstRun)
             {
-                StuffContainer.transform.GetChild(0).GetChild(4).gameObject.SetActive(false);
-                StuffContainer.transform.localPosition = new Vector3(0, -11375f, 0);
-                reset = true;
+                UnlockFreeItems();
+                PopulateShopItems();
+
+                if (ButtonBase == null)
+                {
+                    ButtonBase = FindObjectOfType<GorillaPressableButton>();
+                }
+
+                InitializeScrollBars();
+
+                firstRun = true;
             }
         }
 
