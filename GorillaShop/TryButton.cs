@@ -9,7 +9,7 @@ namespace GorillaShop
 {
     public class TryButton : MonoBehaviour
     {
-        public ShopManager.ShopItem item;
+        public ShopManager.ShopItem Item;
 
         public float debounceTime = 0.25f;
 
@@ -31,7 +31,7 @@ namespace GorillaShop
             GorillaTriggerColliderHandIndicator component = collider.GetComponent<GorillaTriggerColliderHandIndicator>();
             if (!(component == null))
             {
-                item.ButtonPress();
+                Item.ButtonPress();
             }
         }
     }

@@ -6,8 +6,8 @@ public class ScollBar : MonoBehaviour
 {
     public bool up;
     private bool isScrolling = false;
-    private float scrollDistance = 5f;
-    private float scrollSpeed = 10f;
+    private float scrollDistance = 65f;
+    private float scrollSpeed = 15f;
 
     public void ButtonActivation()
     {
