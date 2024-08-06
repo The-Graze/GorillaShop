@@ -10,6 +10,7 @@ namespace GorillaShop
         public static Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("GorillaShop.Assets.shop");
         public static AssetBundle bundle = AssetBundle.LoadFromStream(str);
         public static GameObject temp = bundle.LoadAsset<GameObject>("shopanch");
+        public static Material mat = bundle.LoadAsset<Material>("button");
         public static GorillaPressableButton ButtonBase;
 
         void Start()
@@ -18,6 +19,8 @@ namespace GorillaShop
             {
                 new GameObject("GorillaShop Manager", typeof(ShopManager));
                 ButtonBase = FindObjectOfType<GorillaPressableButton>();
+                str.Close();
+                bundle.UnloadAsync(false);
             });
         }
     }

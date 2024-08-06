@@ -28,20 +28,13 @@ namespace GorillaShop
 
         void Start()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-                InitializeShop();
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-            transform.SetParent(GameObject.Find("Environment Objects/LocalObjects_Prefab/City").transform, true);
+           Instance = this;
+           InitializeShop();
         }
 
         void InitializeShop()
         {
+            transform.SetParent(GameObject.Find("Environment Objects/LocalObjects_Prefab/City").transform, true);
             canvas = Instantiate(Plugin.temp, transform).transform.GetChild(0).GetComponent<Canvas>();
             Destroy(Plugin.temp);
             canvas.renderMode = RenderMode.WorldSpace;
@@ -58,8 +51,8 @@ namespace GorillaShop
             baseTransform.GetChild(0).GetChild(0).localPosition = Vector3.zero;
 
             transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            transform.position = new Vector3(-55.4996f, 16.8141f, -115.2831f);
-            transform.rotation = Quaternion.Euler(359.9f, 299.4711f, 0);
+            transform.position = new Vector3(-50.459f, 16.7912f, -119.7197f);
+            transform.localRotation = Quaternion.Euler(0, 321, 0);
         }
 
         void UnlockFreeItems()
@@ -123,7 +116,7 @@ namespace GorillaShop
             var meshFilter = cube.GetComponent<MeshFilter>();
             var scollBar = Instantiate(ButtonBase, transform).AddComponent<ScollBar>();
             scollBar.GetComponent<MeshFilter>().mesh = meshFilter.mesh;
-            scollBar.GetComponent<Renderer>().material = ButtonBase.GetComponent<GorillaPressableButton>().unpressedMaterial;
+            scollBar.GetComponent<MeshRenderer>().material = Plugin.mat;
             Destroy(scollBar.GetComponent<GorillaPressableButton>());
             Destroy(cube);
             scollBar.GetComponent<ScollBar>().up = isUp;
@@ -209,7 +202,7 @@ namespace GorillaShop
                 var meshFilter = cube.GetComponent<MeshFilter>();
                 var butt = Instantiate(Instance.ButtonBase, button.transform).AddComponent<TryButton>();
                 butt.GetComponent<MeshFilter>().mesh = meshFilter.mesh;
-                butt.GetComponent<Renderer>().material = Instance.ButtonBase.GetComponent<GorillaPressableButton>().unpressedMaterial;
+                butt.GetComponent<MeshRenderer>().material = Plugin.mat;
                 Destroy(butt.GetComponent<WardrobeFunctionButton>());
                 Destroy(cube);
                 return butt;
