@@ -28,8 +28,8 @@ namespace GorillaShop
 
         void Start()
         {
-           Instance = this;
-           InitializeShop();
+            Instance = this;
+            InitializeShop();
         }
 
         void InitializeShop()
@@ -53,6 +53,7 @@ namespace GorillaShop
             transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
             transform.position = new Vector3(-50.459f, 16.7912f, -119.7197f);
             transform.localRotation = Quaternion.Euler(0, 321, 0);
+            StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
         }
 
         void UnlockFreeItems()
@@ -63,6 +64,7 @@ namespace GorillaShop
                 {
                     CosmeticsController.instance.itemToBuy = item;
                     CosmeticsController.instance.PurchaseItem();
+                    StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
                 }
             }
         }
@@ -75,7 +77,9 @@ namespace GorillaShop
             {
                 var shopItem = Instantiate(ItemPrefab, StuffContainer.transform).AddComponent<ShopItem>();
                 shopItem.Item = item;
+                StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
             }
+            StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
         }
 
         void InitializeScrollBars()
@@ -89,6 +93,7 @@ namespace GorillaShop
                 downScroll = MakeScroller(false);
                 downScroll.transform.localScale = new Vector3(30, 30, 30);
                 downScroll.transform.localPosition = new Vector3(20.771f, 403.9127f, 6.6018f);
+                StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
             }
         }
 
@@ -105,7 +110,7 @@ namespace GorillaShop
                 }
 
                 InitializeScrollBars();
-
+                StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
                 firstRun = true;
             }
         }
@@ -122,7 +127,6 @@ namespace GorillaShop
             scollBar.GetComponent<ScollBar>().up = isUp;
             return scollBar;
         }
-
 
         public class ShopItem : MonoBehaviour
         {
@@ -151,6 +155,7 @@ namespace GorillaShop
                 if (CosmeticsController.instance.unlockedCosmetics.Contains(Item) || Item.itemCategory == CosmeticsController.CosmeticCategory.Set)
                 {
                     Destroy(gameObject);
+                    Instance.StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
                 }
             }
 
