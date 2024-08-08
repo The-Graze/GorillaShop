@@ -11,7 +11,6 @@ namespace GorillaShop
     public class ShopManager : MonoBehaviour
     {
         public static ShopManager Instance { get; private set; }
-        public int allCost = 0;
 
         public List<CosmeticsController.CosmeticItem> AllItems => CosmeticsController.instance.allCosmetics;
         public List<CosmeticsController.CosmeticItem> AvailableItems { get; private set; }
@@ -26,14 +25,11 @@ namespace GorillaShop
 
         private Vector3 citySpot = new Vector3(-49.9966f, 16.826f, -117.5916f);
 
-        void Start()
-        {
-            Instance = this;
-            InitializeShop();
-        }
+        void Start() => InitializeShop();
 
         void InitializeShop()
         {
+            Instance = this;
             transform.SetParent(GameObject.Find("Environment Objects/LocalObjects_Prefab/City").transform, true);
             canvas = Instantiate(Plugin.temp, transform).transform.GetChild(0).GetComponent<Canvas>();
             Destroy(Plugin.temp);
@@ -93,13 +89,20 @@ namespace GorillaShop
                 downScroll = MakeScroller(false);
                 downScroll.transform.localScale = new Vector3(30, 30, 30);
                 downScroll.transform.localPosition = new Vector3(20.771f, 403.9127f, 6.6018f);
+                downScroll.transform.localRotation = Quaternion.Euler(0, 0, 90);
+
+
                 StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
             }
         }
 
-        void Update()
+        void FixedUpdate()
         {
-            if (!firstRun)
+            if (firstRun)
+            {
+                return;
+            }
+            else if(PhotonNetwork.IsConnectedAndReady || PhotonNetwork.InRoom)
             {
                 UnlockFreeItems();
                 PopulateShopItems();
@@ -111,6 +114,7 @@ namespace GorillaShop
 
                 InitializeScrollBars();
                 StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
+                MakeShow();
                 firstRun = true;
             }
         }
@@ -125,7 +129,29 @@ namespace GorillaShop
             Destroy(scollBar.GetComponent<GorillaPressableButton>());
             Destroy(cube);
             scollBar.GetComponent<ScollBar>().up = isUp;
+            scollBar.name = "Scroll Button: Up = " + isUp;
             return scollBar;
+        }
+
+        ShowButton MakeShow()
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var meshFilter = cube.GetComponent<MeshFilter>();
+            var Show = Instantiate(ButtonBase, transform).AddComponent<ShowButton>();
+            Show.GetComponent<MeshFilter>().mesh = meshFilter.mesh;
+            Show.GetComponent<MeshRenderer>().material = Plugin.mat;
+            Destroy(Show.GetComponent<GorillaPressableButton>());
+            Destroy(cube);
+            Show.transform.SetParent(transform);
+            Show.name = "ShowHide Button";
+            return Show;
+        }
+
+        public void Toggle(bool toggle)
+        {
+            upScroll.gameObject.SetActive(toggle);
+            downScroll.gameObject.SetActive(toggle);
+            transform.GetChild(0).gameObject.SetActive(toggle);
         }
 
         public class ShopItem : MonoBehaviour
@@ -145,24 +171,10 @@ namespace GorillaShop
                 button.SetActive(true);
             }
 
-            void Start()
-            {
-                InitializeItem();
-            }
-
-            void FixedUpdate()
-            {
-                if (CosmeticsController.instance.unlockedCosmetics.Contains(Item) || Item.itemCategory == CosmeticsController.CosmeticCategory.Set)
-                {
-                    Destroy(gameObject);
-                    Instance.StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
-                }
-            }
+            void Start() => InitializeItem();
 
             void InitializeItem()
             {
-                Instance.allCost += Item.cost;
-
                 image.sprite = Item.itemPicture;
                 image.overrideSprite = Item.itemPicture;
 
@@ -182,6 +194,11 @@ namespace GorillaShop
                 tryButton.transform.localScale = new Vector3(31.4587f, 153.8387f, 51.0874f);
                 tryButton.transform.localPosition = new Vector3(-77.2265f, 1.2782f, 2.1455f);
                 tryButton.Item = this;
+                if (CosmeticsController.instance.unlockedCosmetics.Contains(Item) || Item.itemCategory == CosmeticsController.CosmeticCategory.Set)
+                {
+                    Destroy(gameObject);
+                    Instance.StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
+                }
             }
 
             public void ButtonPress()
@@ -210,6 +227,11 @@ namespace GorillaShop
                 butt.GetComponent<MeshRenderer>().material = Plugin.mat;
                 Destroy(butt.GetComponent<WardrobeFunctionButton>());
                 Destroy(cube);
+                foreach (Transform t in butt.transform)
+                {
+                    Destroy(t.gameObject);
+                }
+                butt.name = "TryOn Button";
                 return butt;
             }
         }

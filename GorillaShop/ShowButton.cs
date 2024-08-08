@@ -1,31 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GorillaLocomotion;
-using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace GorillaShop
 {
-    public class TryButton : MonoBehaviour
+    class ShowButton : MonoBehaviour
     {
-        public ShopManager.ShopItem Item;
 
         public float debounceTime = 0.25f;
 
         public float touchTime;
 
-        public void Start()
+        bool toggle;
+
+        Text text;
+
+        void Start()
         {
             foreach (Transform t in transform)
             {
-               Destroy(t.gameObject);
+                if (t.name != "Casual Button Text")
+                {
+                    Destroy(t.gameObject);
+                }
+                else
+                {
+                    text = t.GetComponent<Text>();
+                    text.gameObject.SetActive(true);
+                }
             }
-            GetComponent<Renderer>().enabled = false;
+            transform.localScale = new Vector3(50, 50, 50);
+            transform.position = new Vector3(-50.0233f, 16.8036f, -119.244f);
+            transform.rotation = Quaternion.Euler(346.8203f, 41.924f, 0);
+            ShopManager.Instance.Toggle(toggle);
+            text.text = "SHOW";
         }
-
         private void OnTriggerEnter(Collider collider)
         {
             if (!base.enabled || !(touchTime + debounceTime < Time.time) || collider.GetComponentInParent<GorillaTriggerColliderHandIndicator>() == null)
@@ -35,9 +46,11 @@ namespace GorillaShop
 
             touchTime = Time.time;
             GorillaTriggerColliderHandIndicator component = collider.GetComponent<GorillaTriggerColliderHandIndicator>();
-            if (!(component == null))
+            if (component != null)
             {
-                Item.ButtonPress();
+                toggle = !toggle;
+                ShopManager.Instance.Toggle(toggle);
+                text.text = toggle ? "HIDE" : "SHOW";
                 GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(211, component.isLeftHand, 1);
                 GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
             }
