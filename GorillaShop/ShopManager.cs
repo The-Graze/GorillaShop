@@ -30,7 +30,7 @@ namespace GorillaShop
         void InitializeShop()
         {
             Instance = this;
-            transform.SetParent(GameObject.Find("Environment Objects/LocalObjects_Prefab/City").transform, true);
+            transform.SetParent(GameObject.Find("Environment Objects/LocalObjects_Prefab/City_WorkingPrefab").transform, true);
             canvas = Instantiate(Plugin.temp, transform).transform.GetChild(0).GetComponent<Canvas>();
             Destroy(Plugin.temp);
             canvas.renderMode = RenderMode.WorldSpace;
@@ -47,7 +47,7 @@ namespace GorillaShop
             baseTransform.GetChild(0).GetChild(0).localPosition = Vector3.zero;
 
             transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            transform.position = new Vector3(-50.459f, 16.7912f, -119.7197f);
+            transform.position = new Vector3(-52.7105f,16.7912f, -121.9634f);
             transform.localRotation = Quaternion.Euler(0, 321, 0);
             StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
         }

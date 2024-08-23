@@ -32,7 +32,7 @@ namespace GorillaShop
                 }
             }
             transform.localScale = new Vector3(50, 50, 50);
-            transform.position = new Vector3(-50.0233f, 16.8036f, -119.244f);
+            transform.position = new Vector3(-52.2633f, 16.8036f, - 121.474f);
             transform.rotation = Quaternion.Euler(346.8203f, 41.924f, 0);
             ShopManager.Instance.Toggle(toggle);
             text.text = "SHOW";
