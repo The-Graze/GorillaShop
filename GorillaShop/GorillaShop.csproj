@@ -6,16 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Patches\**" />
-    <EmbeddedResource Remove="Patches\**" />
-    <None Remove="Patches\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Assets\shop" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Assets\shop" />
   </ItemGroup>
 
