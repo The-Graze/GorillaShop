@@ -102,7 +102,7 @@ namespace GorillaShop
             {
                 return;
             }
-            else if(PhotonNetwork.IsConnectedAndReady || PhotonNetwork.InRoom)
+            else if(CosmeticsController.instance.allCosmeticsItemIDsfromDisplayNamesDict_isInitialized)
             {
                 UnlockFreeItems();
                 PopulateShopItems();

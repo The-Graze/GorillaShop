@@ -23,7 +23,6 @@ namespace GorillaShop
             {
                Destroy(t.gameObject);
             }
-            GetComponent<Renderer>().enabled = false;
         }
 
         private void OnTriggerEnter(Collider collider)

@@ -13,6 +13,7 @@ namespace GorillaShop
         public static Material mat = bundle.LoadAsset<Material>("button");
         public static GorillaPressableButton ButtonBase;
 
+        Plugin() => HarmonyPatches.ApplyHarmonyPatches();
         void Start()
         {
             GorillaTagger.OnPlayerSpawned(delegate
@@ -21,6 +22,8 @@ namespace GorillaShop
                 ButtonBase = FindObjectOfType<GorillaPressableButton>();
                 str.Close();
                 bundle.UnloadAsync(false);
+
+                DontDestroyOnLoad(new GameObject("KeyboardListener", typeof(KeyboardListner)));
             });
         }
     }

@@ -1,8 +1,8 @@
 ﻿using GorillaLocomotion;
 using GorillaShop;
 using System.Collections;
-using System.ComponentModel;
 using UnityEngine;
+
 namespace GorillaShop
 {
     public class ScollBar : MonoBehaviour
@@ -11,9 +11,9 @@ namespace GorillaShop
         private bool isScrolling = false;
         private float scrollDistance = 65f;
         private float scrollSpeed = 15f;
+        private float timeoutDuration = 5f;
 
-
-        void Start() 
+        void Start()
         {
             foreach (Transform t in transform)
             {
@@ -23,34 +23,50 @@ namespace GorillaShop
                 }
             }
         }
+
         public void ButtonActivation(bool left)
         {
             if (!isScrolling)
             {
-                StartCoroutine(SmoothScroll(left));
+                StartCoroutine(SmoothScroll(up));
             }
         }
 
-        private IEnumerator SmoothScroll(bool left)
+        IEnumerator SmoothScroll(bool scrollUp)
         {
             isScrolling = true;
-            float targetY = ShopManager.Instance.StuffContainer.transform.localPosition.y + (up ? scrollDistance : -scrollDistance);
 
-            while (Mathf.Abs(ShopManager.Instance.StuffContainer.transform.localPosition.y - targetY) > 0.01f)
+            Transform stuffContainer = ShopManager.Instance.StuffContainer.transform;
+            float startY = stuffContainer.localPosition.y;
+            float targetY = startY + (scrollUp ? scrollDistance : -scrollDistance);
+
+            float contentHeight = ShopManager.Instance.StuffContainer.GetComponent<RectTransform>().rect.height;
+            float viewportHeight = ShopManager.Instance.StuffContainer.transform.parent.GetComponent<RectTransform>().rect.height;
+            float minY = Mathf.Min(0, viewportHeight - contentHeight);
+            float maxY = 0;
+
+            targetY = Mathf.Clamp(targetY, minY, maxY);
+
+            float elapsedTime = 0f;
+
+            while (Mathf.Abs(stuffContainer.localPosition.y - targetY) > 0.01f && elapsedTime < timeoutDuration)
             {
-                Vector3 newPosition = ShopManager.Instance.StuffContainer.transform.localPosition;
-                newPosition.y = Mathf.Lerp(newPosition.y, targetY, Time.deltaTime * scrollSpeed);
-                ShopManager.Instance.StuffContainer.transform.localPosition = newPosition;
+                Vector3 currentPosition = stuffContainer.localPosition;
+                currentPosition.y = Mathf.Lerp(currentPosition.y, targetY, Time.deltaTime * scrollSpeed);
+                stuffContainer.localPosition = currentPosition;
+
+                elapsedTime += Time.deltaTime;
                 yield return null;
             }
 
-            ShopManager.Instance.StuffContainer.transform.localPosition = new Vector3(
-                ShopManager.Instance.StuffContainer.transform.localPosition.x,
-                targetY,
-                ShopManager.Instance.StuffContainer.transform.localPosition.z
+            stuffContainer.localPosition = new Vector3(
+                stuffContainer.localPosition.x,
+                Mathf.Clamp(targetY, minY, maxY),
+                stuffContainer.localPosition.z
             );
-            GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(211, left, 1);
-            GorillaTagger.Instance.StartVibration(left, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
+
+            GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(211, scrollUp, 1);
+            GorillaTagger.Instance.StartVibration(scrollUp, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
             isScrolling = false;
         }
 
