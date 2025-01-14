@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace GorillaShop
 {
-    class ShowButton : MonoBehaviour
+    class ToggleButton : MonoBehaviour
     {
 
         public float debounceTime = 0.25f;

@@ -5,7 +5,7 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using GorillaNetworking.Store;
+using System.Collections;
 
 namespace GorillaShop
 {
@@ -83,25 +83,6 @@ namespace GorillaShop
                         }
                     }
                 }
-                try
-                {
-                    foreach (StoreBundle sb in BundleManager.instance._storeBundles)
-                    {
-                        CosmeticsController.CosmeticItem setItem = CosmeticsController.instance.GetItemFromDict(sb.playfabBundleID);
-                        if (setItem.itemCategory == CosmeticsController.CosmeticCategory.Set)
-                        {
-                            foreach (string s in setItem.bundledItems)
-                            {
-                                CosmeticsController.CosmeticItem i = CosmeticsController.instance.GetItemFromDict(s);
-                                SetItems.Add(i);
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-
-                }
                 var shopItem = Instantiate(ItemPrefab, StuffContainer.transform).AddComponent<ShopItem>();
                 shopItem.Item = item;
                 StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
@@ -164,11 +145,11 @@ namespace GorillaShop
             return scollBar;
         }
 
-        ShowButton MakeToggle()
+        ToggleButton MakeToggle()
         {
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var meshFilter = cube.GetComponent<MeshFilter>();
-            var Show = Instantiate(ButtonBase, transform).AddComponent<ShowButton>();
+            var Show = Instantiate(ButtonBase, transform).AddComponent<ToggleButton>();
             Show.GetComponent<MeshFilter>().mesh = meshFilter.mesh;
             Show.GetComponent<MeshRenderer>().material = Plugin.mat;
             Destroy(Show.GetComponent<GorillaPressableButton>());
@@ -231,46 +212,57 @@ namespace GorillaShop
                     Destroy(gameObject);
                     Instance.StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
                 }
+                StartCoroutine(OwnedCheck());
+            }
+
+            IEnumerator OwnedCheck()
+            {
+                yield return new WaitForSeconds(10);
+                if (CosmeticsController.instance.unlockedCosmetics.Contains(Item))
+                {
+                    Destroy(gameObject);
+                    StopCoroutine(OwnedCheck());
+                }
+                yield return StartCoroutine(OwnedCheck());
             }
 
             public void ButtonPress()
             {
                 var cart = CosmeticsController.instance.currentCart;
+
                 if (cart.Count >= 12)
                 {
                     cart.Clear();
                     CosmeticsController.instance.UpdateShoppingCart();
                 }
-
                 if (Item.itemCategory == CosmeticsController.CosmeticCategory.Set)
                 {
-                    foreach (string s in Item.bundledItems)
+                    foreach (string bundledItemId in Item.bundledItems)
                     {
-                        CosmeticsController.CosmeticItem item = CosmeticsController.instance.GetItemFromDict(s);
-                        if (!cart.Contains(item))
+                        var bundledItem = CosmeticsController.instance.GetItemFromDict(bundledItemId);
+
+                        if (cart.Contains(bundledItem))
                         {
-                            cart.Add(item);
+                            cart.Remove(bundledItem);
                         }
                         else
                         {
-                            cart.Remove(item);
+                            cart.Add(bundledItem);
                         }
-                        CosmeticsController.instance.UpdateShoppingCart();
                     }
                 }
                 else
                 {
-                    if (!cart.Contains(Item))
+                    if (cart.Contains(Item))
                     {
-                        cart.Add(Item);
-                        CosmeticsController.instance.UpdateShoppingCart();
+                        cart.Remove(Item);
                     }
                     else
                     {
-                        cart.Remove(Item);
-                        CosmeticsController.instance.UpdateShoppingCart();
+                        cart.Add(Item);
                     }
                 }
+                CosmeticsController.instance.UpdateShoppingCart();
             }
 
             TryButton MakeButton()
