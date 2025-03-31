@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using GorillaNetworking;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace GorillaShop
         public static AssetBundle bundle = AssetBundle.LoadFromStream(str);
         public static GameObject temp = bundle.LoadAsset<GameObject>("shopanch");
         public static Material mat = bundle.LoadAsset<Material>("button");
-        public static GorillaPressableButton ButtonBase;
+        public static GorillaKeyboardButton ButtonBase;
 
         Plugin() => HarmonyPatches.ApplyHarmonyPatches();
         void Start()
@@ -19,7 +20,7 @@ namespace GorillaShop
             GorillaTagger.OnPlayerSpawned(delegate
             {
                 new GameObject("GorillaShop Manager", typeof(ShopManager));
-                ButtonBase = FindObjectOfType<GorillaPressableButton>();
+                ButtonBase = FindObjectOfType<GorillaKeyboardButton>();
                 str.Close();
                 bundle.UnloadAsync(false);
 

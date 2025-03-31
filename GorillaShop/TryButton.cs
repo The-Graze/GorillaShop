@@ -19,10 +19,6 @@ namespace GorillaShop
 
         public void Start()
         {
-            foreach (Transform t in transform)
-            {
-               Destroy(t.gameObject);
-            }
         }
 
         private void OnTriggerEnter(Collider collider)

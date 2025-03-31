@@ -26,9 +26,10 @@ namespace GorillaShop
         private ScollBar upScroll, downScroll;
 
         private Vector3 citySpot = new Vector3(-49.9966f, 16.826f, -117.5916f);
-
-        void Start() => InitializeShop();
-
+        void Start()
+        { 
+            CosmeticsV2Spawner_Dirty.OnPostInstantiateAllPrefabs2 += InitializeShop;
+        }
         void InitializeShop()
         {
             Instance = this;
@@ -49,9 +50,33 @@ namespace GorillaShop
             baseTransform.GetChild(0).GetChild(0).localPosition = Vector3.zero;
 
             transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            transform.position = new Vector3(-52.7105f,16.7912f, -121.9634f);
+            transform.position = new Vector3(-52.7105f, 16.7912f, -121.9634f);
             transform.localRotation = Quaternion.Euler(0, 321, 0);
             StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
+        }
+
+        void OnEnable()
+        {
+            if (firstRun)
+            {
+                return;
+            }
+            else if (CosmeticsController.instance.allCosmeticsItemIDsfromDisplayNamesDict_isInitialized)
+            {
+                UnlockFreeItems();
+                PopulateShopItems();
+
+                if (ButtonBase == null)
+                {
+                    ButtonBase = FindObjectOfType<GorillaPressableButton>();
+                }
+
+                InitializeScrollBars();
+                StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
+                MakeToggle();
+                firstRun = true;
+            }
+
         }
 
         void UnlockFreeItems()
@@ -110,25 +135,7 @@ namespace GorillaShop
 
         void FixedUpdate()
         {
-            if (firstRun)
-            {
-                return;
-            }
-            else if(CosmeticsController.instance.allCosmeticsItemIDsfromDisplayNamesDict_isInitialized)
-            {
-                UnlockFreeItems();
-                PopulateShopItems();
 
-                if (ButtonBase == null)
-                {
-                    ButtonBase = FindObjectOfType<GorillaPressableButton>();
-                }
-
-                InitializeScrollBars();
-                StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
-                MakeToggle();
-                firstRun = true;
-            }
         }
 
         ScollBar MakeScroller(bool isUp)
@@ -186,7 +193,7 @@ namespace GorillaShop
             void Start() => InitializeItem();
 
             void InitializeItem()
-            {        
+            {
                 if (displayName.text == "NOTHING" || ShopManager.Instance.SetItems.Contains(Item))
                 {
                     Destroy(gameObject);
@@ -233,34 +240,14 @@ namespace GorillaShop
                 if (cart.Count >= 12)
                 {
                     cart.Clear();
-                    CosmeticsController.instance.UpdateShoppingCart();
                 }
-                if (Item.itemCategory == CosmeticsController.CosmeticCategory.Set)
+                if (cart.Contains(Item))
                 {
-                    foreach (string bundledItemId in Item.bundledItems)
-                    {
-                        var bundledItem = CosmeticsController.instance.GetItemFromDict(bundledItemId);
-
-                        if (cart.Contains(bundledItem))
-                        {
-                            cart.Remove(bundledItem);
-                        }
-                        else
-                        {
-                            cart.Add(bundledItem);
-                        }
-                    }
+                    cart.Remove(Item);
                 }
                 else
                 {
-                    if (cart.Contains(Item))
-                    {
-                        cart.Remove(Item);
-                    }
-                    else
-                    {
-                        cart.Add(Item);
-                    }
+                    cart.Add(Item);
                 }
                 CosmeticsController.instance.UpdateShoppingCart();
             }
