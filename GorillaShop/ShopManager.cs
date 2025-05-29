@@ -63,17 +63,11 @@ namespace GorillaShop
             }
             else if (CosmeticsController.instance.allCosmeticsItemIDsfromDisplayNamesDict_isInitialized)
             {
-                UnlockFreeItems();
-                PopulateShopItems();
-
-                if (ButtonBase == null)
-                {
-                    ButtonBase = FindObjectOfType<GorillaPressableButton>();
-                }
-
                 InitializeScrollBars();
                 StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
                 MakeToggle();
+                PopulateShopItems();
+                UnlockFreeItems();
                 firstRun = true;
             }
 
@@ -98,19 +92,27 @@ namespace GorillaShop
 
             foreach (var item in AvailableItems)
             {
-                if (item.itemCategory == CosmeticsController.CosmeticCategory.Set)
+                try
                 {
-                    if (item.bundledItems.Count() >= 1)
+
+                    if (item.itemCategory == CosmeticsController.CosmeticCategory.Set)
                     {
-                        foreach (string s in item.bundledItems)
+                        if (item.bundledItems.Count() >= 1)
                         {
-                            SetItems.Add(CosmeticsController.instance.GetItemFromDict(s));
+                            foreach (string s in item.bundledItems)
+                            {
+                                SetItems.Add(CosmeticsController.instance.GetItemFromDict(s));
+                            }
                         }
                     }
+                    var shopItem = Instantiate(ItemPrefab, StuffContainer.transform).AddComponent<ShopItem>();
+                    shopItem.Item = item;
+                    StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
                 }
-                var shopItem = Instantiate(ItemPrefab, StuffContainer.transform).AddComponent<ShopItem>();
-                shopItem.Item = item;
-                StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
+                catch
+                {
+
+                }
             }
             StuffContainer.transform.localPosition = new Vector3(0, -999999, 0);
         }
@@ -135,7 +137,10 @@ namespace GorillaShop
 
         void FixedUpdate()
         {
-
+            if (ButtonBase == null)
+            {
+                ButtonBase = FindObjectOfType<GorillaPressableButton>();
+            }
         }
 
         ScollBar MakeScroller(bool isUp)
